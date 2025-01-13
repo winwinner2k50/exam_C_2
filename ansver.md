@@ -1,3 +1,12 @@
+<style>    
+    code {
+        background-color: #f0f0f0;
+        font-family: Consolas, Monaco, 'Courier New', Courier, monospace;
+        color:rgb(0, 27, 204) !important;
+    }
+</style>
+
+
 # 1 - Указатель на void. стандартные функции обработки областей памяти
 
 Для чего используется указатель на void, примеры. особенности использования + примеры. Про функции обработки областей памяти memcpy, memset, memmove

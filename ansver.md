@@ -957,9 +957,185 @@ void free_tree(tree_node_t *tree)
 }
 ```
 # 24 - Бинарное дерево поиска. Обход
-Что такое дерево. Чем бинарное дерево поиска отличается от обычного. Особенности бинарного дерева поиска. ++ Про узлы. 3 вида обхода: для решения каких задач какой вид используется. Как описывается и освобождается эта структура в Си.
+#### Определение
+`Дерево` - связный ациклический граф.  
+`Двоичным деревом поиска` называют дерево, все вершины которого упорядочены, каждая вершина имеет не более двух потомков (левого и правого) и все вершины, кроме корня, имеют родителя.   
+Основное свойство бинарного дерева: все левые потомки узла __меньше__ его, все правые - __больше__.  
+
+#### Про узлы
+Узел - единица хранения данных, несущая в себе ссылки на связанные с ней узлы.  
+Узел обычно состоит из двух частей: информационной и ссылочной
+```c
+typedef struct node 
+{
+    type_t data;
+    struct node *next;
+    // struct node *prev;
+    // struct node *end;
+} node_t;
+```
+
+#### Базовые операции
+- добавление узла
+- поиск узла
+- удаление узла
+- обход дерева
+
+#### Описание ДДП в Си:
+```c
+struct tree_node
+{
+    int data;
+    struct tree_node *left;
+    struct tree_node *right;
+} tree_node_t;
+```
+Опишем обходы в дереве
+```c
+int compare_nodes(const void *l, const void *r)
+{
+    ...
+}
+```c
+void inorder(tree_node_t *tree, void (*f)(tree_node_t, void *), void *arg)
+{
+    if (tree = NULL)
+        return;
+    inorder(tree->left, f, arg);
+    f(tree, arg);
+    inorder(tree->right, f, arg);
+}
+
+void preorder(tree_node_t *tree, void (*f)(tree_node_t, void *), void *arg)
+{
+    if (tree = NULL)
+        return;
+    f(tree, arg);
+    preorder(tree->left, f, arg);
+    preorder(tree->right, f, arg);
+}
+
+void postorder(tree_node_t *tree, void (*f)(tree_node_t, void *), void *arg)
+{
+    if (tree = NULL)
+        return;
+    postorder(tree->left, f, arg);
+    postorder(tree->right, f, arg);
+    f(tree, arg);
+}
+
+```
+
+Инфиксный нужен чтобы получить отсортированные данные из дерева.  
+Префиксный нужен чтобы копировать дерево или префиксное выражение.  
+Постфиксный нужен чтобы удалять дерево, освобождать все ресурсы верно.  
+
+Опишем очистку дерева
+```c
+void free_tree(tree_node_t *tree)
+{
+    if (tree)
+    {
+        free_tree(tree->left);
+        free_tree(tree->right);
+        free_node(tree);
+        tree = NULL;
+    }
+}
+```
 # 25 - Бинарное дерево поиска. Удаление элемента
-Что такое дерево. Чем бинарное дерево поиска отличается от обычного. Особенности бинарного дерева поиска. ++ Про узлы. Как описывается и освобождается эта структура в Си.
+#### Определение
+`Дерево` - связный ациклический граф.  
+`Двоичным деревом поиска` называют дерево, все вершины которого упорядочены, каждая вершина имеет не более двух потомков (левого и правого) и все вершины, кроме корня, имеют родителя.   
+Основное свойство бинарного дерева: все левые потомки узла __меньше__ его, все правые - __больше__.  
+
+#### Про узлы
+Узел - единица хранения данных, несущая в себе ссылки на связанные с ней узлы.  
+Узел обычно состоит из двух частей: информационной и ссылочной
+```c
+typedef struct node 
+{
+    type_t data;
+    struct node *next;
+    // struct node *prev;
+    // struct node *end;
+} node_t;
+```
+
+#### Базовые операции
+- добавление узла
+- поиск узла
+- удаление узла
+- обход дерева
+
+#### Описание ДДП в Си:
+```c
+struct tree_node
+{
+    int data;
+    struct tree_node *left;
+    struct tree_node *right;
+} tree_node_t;
+```
+Опишем удаление в дереве
+```c
+tree_node_t* delete_node(tree_node_t *root, int key) {
+    if (root == NULL) return NULL;
+
+    if (key < root->data) 
+    {
+        root->left = delete_node(root->left, key);
+    } 
+    
+    else if (key > root->data) 
+    {
+        root->right = delete_node(root->right, key);
+    } 
+    
+    else 
+    {
+        if (root->left == NULL && root->right == NULL) {
+            free_node(root);
+            return NULL;
+        }
+        
+        if (root->left == NULL) {
+            tree_node_t *temp = root->right;
+            free_node(root);
+            return temp;
+        }
+        
+        if (root->right == NULL) {
+            tree_node_t *temp = root->left;
+            free_node(root);
+            return temp;
+        }
+        
+        tree_node_t *current = root->right;
+        while (current != NULL && current->left != NULL) {
+            current = current->left;
+        }
+        root->data = current->data;
+        root->right = delete_node(root->right, current->data);
+    }
+
+    return root;
+}
+```
+
+Опишем очистку дерева
+```c
+void free_tree(tree_node_t *tree)
+{
+    if (tree)
+    {
+        free_tree(tree->left);
+        free_tree(tree->right);
+        free_node(tree);
+        tree = NULL;
+    }
+}
+```
 # 26 - Куча в программе на Си. Алгоритм работы функций malloc free
 //Скорее всего будет разделено на 3 вопроса: 1) malloc, 2) free, 3) выравнивание
 Когда описывается алгоритм работы malloc или free нужно не только словесное описание но и сама реализация соответствующей функции (как на лекции). Лучше сразу реализацию и потом как комментарии писать общий алгоритм.

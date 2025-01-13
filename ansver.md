@@ -660,9 +660,191 @@ app.exe: $(OFILES)
 # 21 - Линейный односвязный список. Обход
 Определение узла, списка, линейного односвязного списка. Чем отличаются массивы от списков. Реализовать функции и сопроводить ее схемой-картинкой. Как описывается и освобождается эта структура в Си.
 # 22 - Бинарное дерево поиска. Добавление элемента
-Что такое дерево. Чем бинарное дерево поиска отличается от обычного. Особенности бинарного дерева поиска. ++ Про узлы. Как описывается и освобождается эта структура в Си.
+
+#### Определение
+`Дерево` - связный ациклический граф.  
+`Двоичным деревом поиска` называют дерево, все вершины которого упорядочены, каждая вершина имеет не более двух потомков (левого и правого) и все вершины, кроме корня, имеют родителя.   
+Основное свойство бинарного дерева: все левые потомки узла __меньше__ его, все правые - __больше__.  
+
+#### Про узлы
+Узел - единица хранения данных, несущая в себе ссылки на связанные с ней узлы.  
+Узел обычно состоит из двух частей: информационной и ссылочной
+```c
+typedef struct node 
+{
+    type_t data;
+    struct node *next;
+    // struct node *prev;
+    // struct node *end;
+} node_t;
+```
+
+#### Базовые операции
+- добавление узла
+- поиск узла
+- удаление узла
+- обход дерева
+
+#### Описание ДДП в Си:
+```c
+typedef struct tree_node
+{
+    int data;
+    struct tree_node *left;
+    struct tree_node *right;
+} tree_node_t;
+```
+Опишем основные действия в дереве
+-   создание/очистка узла
+    ```c
+    tree_node_t *create_node(int data)
+    {
+        tree_node_t *new = malloc(sizeof(tree_node_t));
+        if (!new)
+            return NULL;
+        
+        new->data = data;
+        new->left = NULL;
+        new->right = NULL;
+
+        return new;
+    }
+
+    void free_node(tree_node_t *node)
+    {
+        // free(data); // в случае, если наша data была бы указателем на динамические данные
+        free(node);
+    }
+
+    int main()
+    {
+        tree_node_t *node = create_node(5);
+        printf("%d\n", node->data);
+        free_node(node);
+        node = NULL;
+        return 0;
+    }
+    ```
+-   добавление узла в дерево
+    ```c
+    int compare_nodes(const void *l, const void *r)
+    {
+        ...
+    }
+
+    tree_node_t *insert(tree_node_t *tree, tree_node_t *node)
+    {
+        if (tree == NULL)
+            return node;
+        int cmp = compare_nodes(tree->data, node->data);
+        if (cmp < 0)
+            tree->left = insert(tree->left, node);
+        else
+            tree->right = insert(tree->right, node);
+        
+        return tree;
+    }
+    ```
+-   очистка дерева
+    ```c
+    void free_tree(tree_node_t *tree)
+    {
+        if (tree)
+        {
+            free_tree(tree->left);
+            free_tree(tree->right);
+            free_node(tree);
+            tree = NULL;
+        }
+    }
+    ```
+
 # 23 - Бинарное дерево поиска. Поиск элемента
-Что такое дерево. Чем бинарное дерево поиска отличается от обычного. Особенности бинарного дерева поиска. ++ Про узлы. Поиск элемента в 2 версиях: рекурсивный и нерекурсивный. Привести оба варианта. Как описывается и освобождается эта структура в Си.
+#### Определение
+`Дерево` - связный ациклический граф.  
+`Двоичным деревом поиска` называют дерево, все вершины которого упорядочены, каждая вершина имеет не более двух потомков (левого и правого) и все вершины, кроме корня, имеют родителя.   
+Основное свойство бинарного дерева: все левые потомки узла __меньше__ его, все правые - __больше__.  
+
+#### Про узлы
+Узел - единица хранения данных, несущая в себе ссылки на связанные с ней узлы.  
+Узел обычно состоит из двух частей: информационной и ссылочной
+```c
+typedef struct node 
+{
+    type_t data;
+    struct node *next;
+    // struct node *prev;
+    // struct node *end;
+} node_t;
+```
+
+#### Базовые операции
+- добавление узла
+- поиск узла
+- удаление узла
+- обход дерева
+
+#### Описание ДДП в Си:
+```c
+struct tree_node
+{
+    int data;
+    struct tree_node *left;
+    struct tree_node *right;
+} tree_node_t;
+```
+Опишем поиск в дереве
+```c
+int compare_nodes(const void *l, const void *r)
+{
+    ...
+}
+```c
+tree_node_t *find(tree_node_t *tree, int data)
+{
+    int cmp;
+
+    while (tree)
+    {
+        cmp = compare_nodes(data, tree->data);
+        if (cmp == 0)
+            return tree;
+        if (cmp > 0)
+            tree = tree->right;
+        else
+            tree = tree->left;
+    }
+    return NULL;
+}
+tree_node_t *find2(tree_node_t *tree, int data)
+{
+    int cmp;
+    if (tree == NULL)
+        return NULL;
+
+    cmp = compare_nodes(data, tree->data);
+    if (cmp == 0)
+        return tree;
+    if (cmp < 0)
+        return find2(tree->left, data);
+    else
+        return find2(tree->right, data);
+}
+```
+Опишем очистку дерева
+```c
+void free_tree(tree_node_t *tree)
+{
+    if (tree)
+    {
+        free_tree(tree->left);
+        free_tree(tree->right);
+        free_node(tree);
+        tree = NULL;
+    }
+}
+```
+
 # 24 - Бинарное дерево поиска. Обход
 Что такое дерево. Чем бинарное дерево поиска отличается от обычного. Особенности бинарного дерева поиска. ++ Про узлы. 3 вида обхода: для решения каких задач какой вид используется. Как описывается и освобождается эта структура в Си.
 # 25 - Бинарное дерево поиска. Удаление элемента

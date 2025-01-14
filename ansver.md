@@ -2613,12 +2613,287 @@ _Но надо отключить -pedantic, т.к. по стандарту ук
 ## 37.3 - функции модули расширения. Разработка модуля расширения
 Какие шаги нужно выполнить, чтобы реализовать модуль расширения. Подключить Python.h, все функции имеют один и тот же заголовок, как из аргументов, переданных императором, достать переменные в Си, как потом сформировать результат, что есть за метаинформация и т.д.
 ## 37.4 - все из 37.1-37.3 + разработка функции модуля расширени, которая обрабатывает последовательность.
+
+
 # 38 - Абстрактный тип данных. Понятие модуль. Разновидности модулей. Абстрактный объект стек. 
 Определение модуля. Какие разновидности модулей бывают. Какие есть средства для реализации модулей в Си. Далее про абстрактный объект с примером реализации. // Если не успеваете, то начинаете с примера: реализация, а потом уже туда докинуть что-то из теории.
+#### Определение
+`Модуль` - это несколько файлов, состоит из двух частей: интерфейса и реализации.  
+`Интерфейс` описывает, что модуль делает. Он определяет идентификаторы, типы и подпрограммы, которые будут доступны коду, использующему этот модуль.  
+`Реализация` описывает, как модуль выполняет то, что предлагает интерфейс.
+
+У модуля обычно 1 интерфейс и несколько реализаций, клиент должен зависеть только от интерфейса, но не от деталей реализации.
+
+#### Как это делать в Си
+Интерфейс описывается в заголовочном файле `(*.h)`, здесь описываются макросы, типы, переменные, функции, которые клиент может использовать. Клиент импортирует интерфейс с помощью `#include`
+
+Реализация интерфейса в Си представляется одним или несколькими файлами с расширением `*.с`. Она определяеь переменные и функции, необходимые для обеспечения возможностей, описанных в интерфейсе. Реализация обязательно должна включать файл описания интерфейса, чтобы гарантировать согласованность интерфейса и реализации.
+
+#### Стек с примером
+`stack.h`
+```c
+#ifndef STACK_H_
+#define STACK_H_
+
+#include <stdbool.h>
+#include "tree_node.h"
+
+#define ERR_OK 0
+#define ERR_EMPTY 1
+#define ERR_FULL 2
+
+typedef struct tree_node_t* item_t;
+
+bool is_empty(void);
+
+bool is_full(void);
+
+int init(void);
+
+int push(item_t item);
+
+int pop(item_t *pitem);
+
+#endif
+
+```
+`stack.c`
+```c
+#include <assert.h>
+#include <stddef.h>
+#include "stack.h"
+
+#define N 100
+
+static item_t g_stack[N];
+static size_t g_top;
+
+bool is_empty(void)
+{
+    return g_top == 0;
+}
+
+bool is_full(void)
+{
+    return g_top > N;
+}
+
+int init(void)
+{
+    g_top = 0;
+    
+    return ERR_OK;
+}
+
+int push(item_t item)
+{
+    if (is_full())
+        return ERR_FULL;
+        
+    g_stack[g_top] = item;
+    g_top++;
+    
+    return ERR_OK;
+}
+
+int pop(item_t *pitem)
+{
+    assert(pitem);
+
+    if (is_empty())
+        return ERR_EMPTY;
+        
+    g_top--;
+    *pitem = g_stack[g_top];
+
+    return ERR_OK;
+}
+
+```
+
 # 39 - Абстрактный тип данных. Понятие модуль. Разновидности модулей. Абстрактный тип данных стек целых чисел
 Определение модуля. Какие разновидности модулей бывают. Какие есть средства для реализации модулей в Си. Далее про абстрактный тип данных с примером реализации. // Если не успеваете, то начинаете с примера: реализация, а потом уже туда докинуть что-то из теории.
+
+См. вопрос 38.
+
+#### Стек целых чисел с примером
+`stack.h`
+```c
+#ifndef STACK_H_
+#define STACK_H_
+#include <stddef.h>
+#include <stdbool.h>
+
+#define ERR_OK 0
+#define ERR_EMPTY 1
+#define ERR_FULL 2
+
+typedef int item_t;
+
+typedef struct stack_ stack_t;
+
+bool is_empty(const stack *s);
+
+bool is_full(const stack *s);
+
+int init(stack_t *s);
+
+int push(stack_t *s, item_t item);
+
+int pop(stack_t *s, item_t *pitem);
+
+stack_t *create(void);
+
+void destroy(stack_t *s);
+
+#endif
+```
+`stack.c`
+```c
+#include <assert.h>
+#include <stdlib.h>
+#include "stack.h"
+
+#define N 100
+
+struct stack_
+{
+    item_t stack[N];
+    size_t top;
+};
+
+bool is_empty(const stack_t *s)
+{
+    assert(s);
+    return s->top == 0;
+}
+
+bool is_full(const stack_t *s)
+{
+    assert(s);
+    return s->top > N;
+}
+
+int init(stack_t *s)
+{
+    assert(s);
+    s->top = 0;
+    return ERR_OK;
+}
+
+int push(stack_t *s, item_t item)
+{
+    assert(s);
+    if (is_full(s))
+        return ERR_FULL;
+    
+    s->stack[s->top] = item;
+    (s->top)++;
+    
+    return ERR_OK;
+}
+
+int pop(stack_t *s, item_t *pitem)
+{
+    assert(s);
+    assert(pitem);
+
+    if (is_empty(s))
+        return ERR_EMPTY;
+
+    (s->top)--;
+    *pitem = s->stack[s->top];
+
+    return ERR_OK;
+}
+
+stack_t *create(void)
+{
+    stack_t *s = malloc(sizeof(stack_t));
+    
+    if (s)
+        (void) init(s);
+
+    return s;
+}
+
+void destroy(stack_t *s)
+{
+    free(s);
+}
+```
+
 # 40 - Списки ядра Линкус (горите в 9 кругах ада). Идеи, основные моменты использования.
 Реализовать приложение по примеру того, что было в лекции (простейший список целых чисел с добавлением элемента, обходом списка, удалением элемента и освобождением памяти).
+
+#### Определение
+`Список Беркли` - циклический двусвязный список, в основе которого лежит следующая структура:
+```c
+struct list_head
+{
+    struct list_head *next, *prev;
+}
+```
+В отличие от обычных списков, где данные содержатся в элементах списка, структура `list_head` должна быть частью самих данных.
+
+Отметим следующее:
+- Структуру `list_head` можно поместить в любом месте в определении структуры
+- `struct list_head` может иметь любое имя
+- В структуре может быть несколько полей типа `struct list_head`
+
++|-
+---|---
+Одно выделение памяти на узел списка|Независимо от того в списке узел или нет присутствуют два дополнительных указателя
+
+Универсальная реализация достигается макросами
+```c
+struct data_t
+{
+    int num;
+    struct list_head list;
+}
+
+int main(void)
+{
+    LIST_HEAD(num_list);
+    // добавление данных
+    struct data_t *item;
+    for (int i = 0; i < 10; ++i)
+    {
+        item = malloc(sizeof(struct data_t));
+        if (!item)
+            break;
+        item->num = i;
+        // Инициализируем ссылочную часть данных
+        INIT_LIST_HEAD(&(item->list));
+        list_add(&(item->list), &num_list);
+    }
+
+    // 1. each (print)
+    struct list_head *iter; 
+    list_for_each(iter, &num_list) 
+    {
+        item = list_entry(iter, struct data, list);
+        printf("LIST: %d\n", item->num); 
+    }
+
+    // 2. each (print)
+    list_for_each_entry(item, &num_list, list) 
+        printf("LIST: %d\n", item->num);
+
+    // free
+    struct list_head *iter_safe; // Нужен для 
+    list_for_each_safe(iter, iter_safe, &num_list) 
+    {
+        item = list_entry(iter, struct data, list); 
+        list_del(iter);
+            free(item);
+    }
+
+    return 0;
+}
+```
+
 // Должна быть предоставлена шпаргалка с названиями макросов. Если ее нет, напомнить
 # 41 - Списки ядра Линкус. Идея, основные моменты реализации.
 Сосредоточиться на реализации макроса container_of. (как по указателю на поле структуры можно получить указатель на саму структуру).

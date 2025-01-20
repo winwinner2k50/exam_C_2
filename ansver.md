@@ -936,7 +936,6 @@ void free_matrix(double **ptrs, size_t n)
     ```
 
 # 15 - Строки в динамической памяти, функции POSIX, расширение GNU
-3 функции, которые относятся к POSIX и GNU: strdup, getline, sprintf. Нужно не только рассказать про функции и особенности их работы, но и реализовать их функционал самостоятельно (подготовить getline). Про Feature Test Macro: что это такое, для чего нужно.
 
 ## 3 функции, которые относятся к POSIX и GNU: strdup, getline, sprintf.
 
@@ -1033,7 +1032,7 @@ ssize_t my_getline(char **lineptr, size_t *n, FILE *stream)
 ```c
 int sprintf(char *str, const char *format, ...);
 ```
-
+Далее идет не идеальный вариант реализации `sprintf`, но суть заключена в использовании функции `snprintf`  
 ```c
 int my_sprintf(char *str, const char *format, ...);
 {
@@ -1052,13 +1051,13 @@ int my_sprintf(char *str, const char *format, ...);
 }
 ```
 
-## Про Feature Test Macro: что это такое, для чего нужно.
+### Про Feature Test Macro: что это такое, для чего нужно.
 
 Feature Test Macros (FTM) используются для включения или выключения определенных функциональных возможностей или расширений в стандартной библиотеке
 
 ```c
 #define _POSIX_C_SOURCE 200809L // Включаем POSIX.1-2008
-#define _GNU_SOURCE // до glibc 2.10 // надеюсь не опечатался
+#define _GNU_SOURCE // до glibc 2.10 
 ```
 
 # 16 - Особенности использования структур с полями-указателями
